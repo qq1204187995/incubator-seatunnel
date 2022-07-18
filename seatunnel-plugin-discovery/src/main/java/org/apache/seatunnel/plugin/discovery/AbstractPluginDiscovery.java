@@ -88,6 +88,7 @@ public abstract class AbstractPluginDiscovery<T> implements PluginDiscovery<T> {
             if (t instanceof Plugin) {
                 // old api
                 Plugin<?> pluginInstance = (Plugin<?>) t;
+                String pluginName = pluginInstance.getPluginName();
                 if (StringUtils.equalsIgnoreCase(pluginInstance.getPluginName(), pluginIdentifier.getPluginName())) {
                     return (T) pluginInstance;
                 }

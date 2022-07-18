@@ -32,7 +32,7 @@ import java.nio.file.Paths;
 public class LocalSparkExample {
 
     public static void main(String[] args) throws URISyntaxException, FileNotFoundException, CommandException {
-        String configFile = getTestConfigFile("/examples/spark.batch.conf");
+        String configFile = getTestConfigFile("/examples/spark.hive.conf");
         SparkCommandArgs sparkArgs = new SparkCommandArgs();
         sparkArgs.setConfigFile(configFile);
         sparkArgs.setCheckConfig(false);
