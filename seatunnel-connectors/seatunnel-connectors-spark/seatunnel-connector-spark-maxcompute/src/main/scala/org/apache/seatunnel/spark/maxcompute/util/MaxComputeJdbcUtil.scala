@@ -36,22 +36,26 @@ object MaxComputeJdbcUtil {
                          table : String ,fieldNames: Array[String]) ={
     val connection = getJdbcConnection(address, accessKeyId, accessKeySecret, project)
     val fieldAndValue: (String, String) = getFieldAndValue(fieldNames)
-    val sql = s"insert into ${table} (${fieldAndValue._1}) values(${fieldAndValue._2})"
-    LOG.info(s"execute sql : ${sql}")
     val statement = connection.createStatement()
     println("select column_name from information_schema.columns where table_schema='%s' and table_name = '%s'".format(project.toLowerCase,table.toLowerCase()))
-    val set = statement.executeQuery("select column_name from information_schema.columns where table_schema='%s' and table_name = '%s'".format(project.toLowerCase,table.toLowerCase()))
+    val set = statement.executeQuery("select column_name,COLUMN_DEFAULT from information_schema.columns where table_schema='%s' and table_name = '%s'".format(project.toLowerCase,table.toLowerCase()))
+    val sb = new StringBuffer()
+    var value=new AnyRef
     while (set.next()){
-      println(111111111)
-      LOG.info(s"column : ${set.getString("column_name")}")
+      sb.append(set.getString("column_name")+",")
+      value = set.getObject(2)
     }
+    val allField = sb.deleteCharAt(sb.length() - 1).toString
+    val allFieldArray: Array[String] = allField.split(",")
+    val sql = s"insert into ${table} values(${allFieldArray.map(_ => "?").mkString(",")})"
+    LOG.info(s"execute sql : ${sql}")
     val preparedStatement = connection.prepareStatement(sql)
     for(row <- partition){
-      for(i <- fieldNames.indices){
-        if (row.get(i)==null) {
-          preparedStatement.setObject(i+1,null)
-        }else {
-          preparedStatement.setObject(i+1,row.get(i))
+      for(i <- allFieldArray.indices){
+        val field = allFieldArray(i);
+        val index = fieldNames.indexOf(field)
+        if (index != -1) {
+          preparedStatement.setObject(i+1,row.get(index))
         }
       }
       preparedStatement.addBatch()
