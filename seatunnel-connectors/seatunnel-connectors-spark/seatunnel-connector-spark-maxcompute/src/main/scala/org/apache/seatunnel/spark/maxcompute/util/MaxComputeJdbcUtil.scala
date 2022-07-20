@@ -95,7 +95,6 @@ object MaxComputeJdbcUtil {
     }catch {
       case e: ArithmeticException => {
         LOG.error("Fail to close the connection,but the job have done successfully")
-        throw e
       }
     }
 
